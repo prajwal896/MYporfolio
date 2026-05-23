@@ -1,0 +1,355 @@
+/* ============================================================
+   Navbar.css
+   Rotary-dial circular navbar — top-left corner
+   Dots are placed ON the circular arc via JS polar math.
+   This file handles ONLY visual styling & transitions.
+   All positional math lives in Navbar.jsx.
+const edge
+   TABLE OF CONTENTS:
+   1.  CSS Variables
+   2.  Viewport anchor
+   3.  Scene container (coordinate origin)
+   4.  Full circle body (glassmorphism)
+   5.  Arc SVG strip overlay
+   6.  Micro-particle canvas
+   7.  Nav item wrapper (absolute, arc-placed)
+   8.  Dot ring (outer glow halo)
+   9.  Dot core (bright centre)
+   10. Dot label (hidden → visible on hover)
+   11. Hover state — dot glow & label reveal
+   12. Idle breathing animation
+   13. Idle floating animation
+   14. Accessibility — focus / active
+   ============================================================ */
+
+
+/* ============================================================
+   1. CSS VARIABLES
+   Single source of truth for colors, timing, sizes.
+   Change here → updates entire navbar.
+   ============================================================ */
+
+:root {
+    /* Dot sizing */
+    --dot-core-size: 10px;
+    --dot-ring-size: 22px;
+    /* Dot colors — idle */
+    --dot-idle-core: rgba(255, 255, 255, 0.90);
+    --dot-idle-ring: rgba(255, 255, 255, 0.18);
+    --dot-idle-border: rgba(255, 255, 255, 0.70);
+    --dot-idle-glow: rgba(255, 255, 255, 0.35);
+    /* Dot colors — hovered (golden accent) */
+    --dot-hov-core: #ffd060;
+    --dot-hov-ring: rgba(255, 200, 50, 0.22);
+    --dot-hov-border: #ffcc00;
+    --dot-hov-glow: rgba(255, 190, 30, 0.70);
+    /* Label */
+    --label-size: 10px;
+    --label-color: rgba(255, 255, 255, 0.92);
+    --label-spacing: 0.16em;
+    /* Animation easing */
+    --spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+    --smooth: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    /* Animation durations */
+    --t-pop: 0.38s;
+    --t-label: 0.30s;
+}
+
+
+/* ============================================================
+   2. VIEWPORT ANCHOR
+   Fixed to the very top-left of the screen.
+   Overflow is visible — the viewport itself clips the circle.
+   z-index 900 keeps navbar above all content layers.
+   ============================================================ */
+
+.navbar-anchor {
+    position: fixed;
+    top: -200px;
+    left: -200px;
+    overflow: visible;
+    z-index: 900;
+    /* pointer-events only where scene content exists */
+    pointer-events: none;
+}
+
+
+/* ============================================================
+   3. SCENE CONTAINER
+   Sized to the full circle diameter in Navbar.jsx via inline style.
+   Its top-left corner sits at the viewport corner (0, 0).
+   The circle center therefore lives at (R, R) inside this div,
+   which corresponds exactly to the viewport corner.
+   All child elements use absolute positioning from this origin.
+   ============================================================ */
+
+.navbar-scene {
+    position: absolute;
+    top: 0;
+    left: 0;
+    /* width/height set inline from CFG.diameter */
+    pointer-events: none;
+    /* children enable their own events */
+    /* Idle animations on the scene */
+    animation: navBreath 5s var(--smooth) infinite, navFloat 9s ease-in-out infinite;
+}
+
+
+/* ============================================================
+   4. FULL CIRCLE BODY  (glassmorphism)
+   Fills the entire scene square → looks like a circle via
+   border-radius 50%.
+   Center at (R, R) matches viewport top-left corner.
+   Only the bottom-right quadrant arc is on screen.
+   ============================================================ */
+
+.navbar-circle {
+    position: absolute;
+    inset: 0;
+    /* fills .navbar-scene exactly */
+    border-radius: 50%;
+    /* Glassmorphism — white, very low opacity */
+    background: rgba(255, 255, 255, 0.042);
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    /* Faint outer glow */
+    box-shadow: 0 0 40px rgba(255, 255, 255, 0.03), inset 0 0 30px rgba(255, 255, 255, 0.02);
+    pointer-events: auto;
+    /* catch hover for the circle body */
+}
+
+
+/* Inner decorative ring — very faint, purely visual depth */
+
+.navbar-circle::after {
+    content: '';
+    position: absolute;
+    inset: 8px;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    pointer-events: none;
+}
+
+
+/* ============================================================
+   5. ARC SVG STRIP  (the bright visible rim)
+   SVG is positioned absolute, same size as scene.
+   The actual path (annular sector) is drawn in JSX.
+   This rule just places and layers it correctly.
+   ============================================================ */
+
+.navbar-arc-svg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+    pointer-events: none;
+    /* visual only */
+    z-index: 1;
+}
+
+
+/* ============================================================
+   6. MICRO-PARTICLE CANVAS
+   Same size as scene, absolute positioned.
+   JS animates tiny specs drifting along the arc band.
+   ============================================================ */
+
+.navbar-particles-canvas {
+    position: absolute;
+    inset: 0;
+    opacity: 0.55;
+    pointer-events: none;
+    z-index: 2;
+}
+
+
+/* ============================================================
+   7. NAV ITEM WRAPPER
+   Each item is absolute-positioned by Navbar.jsx inline styles.
+   transform: translate(-50%, -50%) centers the dot on the
+   computed arc coordinate, then the hover pop is added on top.
+   pointer-events: auto enables hover & click on each dot.
+   ============================================================ */
+
+.navbar-item {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    text-decoration: none;
+    user-select: none;
+    pointer-events: auto;
+    z-index: 10;
+    /* Size of the clickable hit area around each dot */
+    width: 40px;
+    height: 40px;
+    /* Pop outward transition — JS inline style changes translate */
+    transition: transform var(--t-pop) var(--spring);
+}
+
+
+/* ============================================================
+   8. DOT RING  (outer glow halo around the dot)
+   Slightly larger than the core, sits behind it.
+   Scales up and glows on hover.
+   ============================================================ */
+
+.dot-ring {
+    position: absolute;
+    width: var(--dot-ring-size);
+    height: var(--dot-ring-size);
+    border-radius: 50%;
+    background: var(--dot-idle-ring);
+    border: 1px solid rgba(255, 255, 255, 0.20);
+    /* No transition — ring is purely decorative, JS animates the item */
+    transition: background 0.28s var(--smooth), box-shadow 0.28s var(--smooth), transform var(--t-pop) var(--spring);
+}
+
+
+/* ============================================================
+   9. DOT CORE  (the bright visible dot)
+   Sits above .dot-ring.
+   This is what the user visually "clicks on".
+   ============================================================ */
+
+.dot-core {
+    position: absolute;
+    width: var(--dot-core-size);
+    height: var(--dot-core-size);
+    border-radius: 50%;
+    background: var(--dot-idle-core);
+    border: 1.5px solid var(--dot-idle-border);
+    box-shadow: 0 0 8px var(--dot-idle-glow);
+    z-index: 1;
+    transition: background 0.25s var(--smooth), border-color 0.25s var(--smooth), box-shadow 0.28s var(--smooth), transform var(--t-pop) var(--spring);
+}
+
+
+/* ============================================================
+   10. DOT LABEL  (text beside the dot)
+   Hidden at rest.
+   Positioned via CSS custom properties --lx / --ly set by JSX
+   so each label points outward from the arc naturally.
+   ============================================================ */
+
+.dot-label {
+    position: absolute;
+    /* Use the outward offset computed in JSX */
+    left: calc(50% + var(--lx, 18px));
+    top: calc(50% + var(--ly, -6px));
+    font-family: 'Raleway', 'Segoe UI', sans-serif;
+    font-size: var(--label-size);
+    font-weight: 400;
+    letter-spacing: var(--label-spacing);
+    text-transform: uppercase;
+    color: var(--label-color);
+    white-space: nowrap;
+    /* Hidden state */
+    opacity: 0;
+    transform: translateX(-6px) translateY(-50%);
+    /* Reveal transition */
+    transition: opacity var(--t-label) var(--smooth) 0.05s, transform var(--t-label) var(--smooth) 0.05s;
+    pointer-events: none;
+    z-index: 20;
+    /* Subtle text shadow for legibility over the dark background */
+    text-shadow: 0 0 12px rgba(255, 255, 255, 0.5), 0 1px 3px rgba(0, 0, 0, 0.8);
+}
+
+
+/* ============================================================
+   11. HOVER STATE
+   Parent (.navbar-item--hovered) is set by React state in JSX.
+   The transform pop (outward movement) is via inline style.
+   This block handles color, glow, label visibility changes.
+   ============================================================ */
+
+
+/* Dot ring — brightens on hover */
+
+.navbar-item--hovered .dot-ring {
+    background: var(--dot-hov-ring);
+    box-shadow: 0 0 18px rgba(255, 200, 40, 0.35), 0 0 40px rgba(255, 150, 0, 0.15);
+    transform: scale(1.35);
+}
+
+
+/* Dot core — goes golden + glows */
+
+.navbar-item--hovered .dot-core {
+    background: var(--dot-hov-core);
+    border-color: var(--dot-hov-border);
+    box-shadow: 0 0 14px var(--dot-hov-glow), 0 0 30px rgba(255, 160, 0, 0.40), 0 0 60px rgba(255, 100, 0, 0.15);
+    transform: scale(1.25);
+}
+
+
+/* Label slides in and becomes visible */
+
+.navbar-item--hovered .dot-label {
+    opacity: 1;
+    transform: translateX(0) translateY(-50%);
+}
+
+
+/* ============================================================
+   12. IDLE BREATHING ANIMATION
+   Very subtle scale + opacity pulse.
+   Applied to .navbar-scene so everything moves together.
+   Invites interaction without being distracting.
+   ============================================================ */
+
+@keyframes navBreath {
+    0%,
+    100% {
+        opacity: 0.90;
+        /* scale handled by navFloat to avoid conflict */
+    }
+    50% {
+        opacity: 1;
+    }
+}
+
+
+/* ============================================================
+   13. IDLE FLOATING ANIMATION
+   Gentle drift of the entire scene.
+   Amounts are very small — cinematic, not bouncy.
+   ============================================================ */
+
+@keyframes navFloat {
+    0% {
+        transform: translate(0px, 0px);
+    }
+    25% {
+        transform: translate(1px, -4px);
+    }
+    50% {
+        transform: translate(2px, -6px);
+    }
+    75% {
+        transform: translate(1px, -3px);
+    }
+    100% {
+        transform: translate(0px, 0px);
+    }
+}
+
+
+/* ============================================================
+   14. ACCESSIBILITY — focus / active states
+   Keyboard navigation gets a visible indicator.
+   ============================================================ */
+
+.navbar-item:focus-visible .dot-core {
+    outline: 2px solid rgba(255, 220, 80, 0.85);
+    outline-offset: 3px;
+}
+
+.navbar-item:active .dot-core {
+    transform: scale(1.10);
+    background: rgba(255, 255, 255, 0.70);
+}

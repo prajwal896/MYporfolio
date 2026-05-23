@@ -1,0 +1,347 @@
+/* ============================================================
+   HeroText.css
+   Layout + typography for the hero section text elements.
+
+   WHAT THIS FILE CONTROLS:
+     - Full-screen wrapper (.herotext-wrap)
+     - Particle canvas placement (.herotext-canvas)
+     - Text block position below the particle name (.herotext-textblock)
+     - Tagline typography + reveal (.herotext-tagline)
+     - Description typography + reveal (.herotext-description)
+     - Staggered reveal transitions
+
+   WHAT THIS FILE DOES NOT CONTROL:
+     - Particle drawing (that's canvas JS in HeroText.jsx)
+     - Enter button (that's Enter.jsx / Enter.css)
+
+   ── HOW THE LAYOUT SYSTEM WORKS ────────────────────────────
+   The particle name is drawn on the canvas at:
+     CFG.textCenterY = 0.38  →  38% from top of viewport
+     CFG.fontSize    = 160px →  ~160px tall letterforms
+
+   Approximate bottom edge of particle name:
+     38% viewport + ~half of 160px ≈ 38vh + 80px
+
+   The text block (.herotext-textblock) is placed at:
+     --text-block-top: 57%   →  starts at 57% from top
+
+   This gives a comfortable gap between the particle name
+   bottom edge and the text block top edge.
+
+   IF YOU CHANGE CFG.textCenterY OR CFG.fontSize in HeroText.jsx,
+   update --text-block-top here to match.
+
+   TABLE OF CONTENTS:
+     1.  Google Fonts import
+     2.  CSS Variables  ← EDIT THESE FOR EASY CUSTOMISATION
+     3.  Full-screen wrapper
+     4.  Particle canvas
+     5.  Text block container  ← the ONE layout system
+     6.  Tagline
+     7.  Description
+     8.  Shared reveal animation
+     9.  Responsive overrides
+   ============================================================ */
+
+
+/* ============================================================
+   1. GOOGLE FONTS
+   Cormorant Garamond is used BOTH by JS (for particle sampling)
+   AND by CSS (for the tagline font-family).
+   If you change the font here, also change CFG.fontFamily in
+   HeroText.jsx so particle positions match the visible font.
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&family=Raleway:wght@300;400&display=swap');
+
+/* ============================================================
+   2. CSS VARIABLES
+   ── EDIT THESE to customise without hunting through the file ──
+
+   SPACING:
+     --text-block-top    where the tagline/desc/button block starts
+                         MUST match CFG.textCenterY + CFG.fontSize
+                         in HeroText.jsx. Default: 57%.
+                         INCREASE this if text overlaps the name.
+                         DECREASE this if there's too much gap.
+
+     --block-gap         vertical gap between tagline, description,
+                         and button INSIDE the text block.
+                         INCREASE for more breathing room.
+
+   TAGLINE:
+     --tagline-size      font size of the main role line
+     --tagline-spacing   letter spacing of the tagline
+
+   DESCRIPTION:
+     --desc-size         font size of the supporting sentence
+     --desc-max-width    max width before description wraps
+     --desc-line-height  line height for the two-line description
+
+   REVEAL:
+     --reveal-dur        how long each element takes to fade in
+     --reveal-ease       easing curve for all fade-ins
+   ============================================================ */
+
+:root {
+    /* ── CHANGE THIS: where the text block starts (% from top) ──
+     Calibrated for CFG.textCenterY=0.38, CFG.fontSize=160px.
+     Rule of thumb: (textCenterY × 100) + fontSize/vh_in_px + buffer
+     If name overlaps text → increase this value.
+     If gap is too large   → decrease this value.                */
+    --text-block-top: 60%;
+    /* ── CHANGE THIS: gap between tagline / description / button ─
+     All three elements are inside a flex column.
+     This single value controls ALL the spacing between them.
+     INCREASE for more cinematic breathing room.                  */
+    --block-gap: 22px;
+    /* ── Tagline ─────────────────────────────────────────────── */
+    /* CHANGE THIS: main role line font size                       */
+    --tagline-size: 22px;
+    /* CHANGE THIS: space between tagline letters                  */
+    --tagline-spacing: 0.30em;
+    --tagline-color: rgba(255, 255, 255, 0.45);
+    --tagline-hover-color: rgba(255, 255, 255, 0.70);
+    --tagline-font: 'Raleway', 'Segoe UI', sans-serif;
+    /* ── Description ─────────────────────────────────────────── */
+    /* CHANGE THIS: supporting sentence font size                  */
+    --desc-size: 13px;
+    /* CHANGE THIS: max width of description text before wrapping  */
+    --desc-max-width: 800px;
+    /* CHANGE THIS: line height of the description                 */
+    --desc-line-height: 2.0;
+    --desc-color: rgba(255, 255, 255, 0.30);
+    /* ── Shared reveal animation ─────────────────────────────── */
+    /* CHANGE THIS: how long the fade-in transition takes          */
+    --reveal-dur: 1.50s;
+    --reveal-ease: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    --reveal-delay: 0.05s;
+}
+
+
+/* ============================================================
+   3. FULL-SCREEN WRAPPER
+   Fixed overlay covering the whole viewport.
+   Transparent — lets background show through.
+   pointer-events: none so background interactions aren't blocked.
+   z-index: 10 → above background (z:0), below navbar (z:900).
+   ============================================================ */
+
+.herotext-wrap {
+    position: fixed;
+    inset: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 10;
+    pointer-events: none;
+    overflow: hidden;
+}
+
+
+/* ============================================================
+   4. PARTICLE CANVAS
+   Fills the wrapper exactly. JS draws the particle name here.
+   pointer-events: auto so mousemove events reach the JS engine
+   for cursor repulsion and brightness interaction.
+   ============================================================ */
+
+.herotext-canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+    pointer-events: auto;
+}
+
+
+/* ============================================================
+   5. TEXT BLOCK CONTAINER  ← THE ONE LAYOUT SYSTEM
+   This is the single flex column that holds tagline,
+   description, and the Enter button together.
+
+   Why flex column + gap instead of individual top values?
+     • One change to --block-gap adjusts ALL spacing at once.
+     • No competing transforms or top percentages.
+     • Adding future elements is trivial — just add to the JSX.
+
+   Horizontal centering: left:50% + translateX(-50%)
+   Vertical position:    top: --text-block-top (calibrated to
+                         sit just below the particle name).
+
+   z-index: 11 → above canvas (z:10) so text is always readable.
+   pointer-events: none on the container — children re-enable
+   their own pointer events where needed (button, tagline hover).
+   ============================================================ */
+
+.herotext-textblock {
+    position: absolute;
+    top: var(--text-block-top);
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--block-gap);
+    /* CHANGE THIS: overall width of the text block area          */
+    width: 90vw;
+    max-width: 640px;
+    z-index: 11;
+    pointer-events: none;
+}
+
+
+/* ============================================================
+   6. TAGLINE
+   Main role / identity line directly below the particle name.
+   Typography: uppercase, wide spacing, thin weight.
+   Starts invisible. JS adds .visible to reveal it.
+   ============================================================ */
+
+.herotext-tagline {
+    margin-top: -15px;
+    padding: 0;
+    font-family: var(--tagline-font);
+    font-size: var(--tagline-size);
+    font-weight: 300;
+    letter-spacing: var(--tagline-spacing);
+    text-transform: uppercase;
+    color: var(--tagline-color);
+    white-space: nowrap;
+    text-align: center;
+    /* Legibility shadow over gradient background */
+    text-shadow: 0 0 18px rgba(200, 220, 255, 0.12), 0 1px 3px rgba(0, 0, 0, 0.55);
+    /* ── Hidden state (before .visible is added by JS) ──────── */
+    opacity: 0;
+    transform: translateY(8px);
+    /* ── Reveal transition ───────────────────────────────────── */
+    transition: opacity var(--reveal-dur) var(--reveal-ease) var(--reveal-delay), transform var(--reveal-dur) var(--reveal-ease) var(--reveal-delay);
+    pointer-events: auto;
+}
+
+
+/* Visible state — JS adds this class */
+
+.herotext-tagline.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+
+/* Very subtle hover brightening */
+
+.herotext-tagline:hover {
+    color: var(--tagline-hover-color);
+    transition: color 0.35s ease, text-shadow 0.35s ease;
+    text-shadow: 0 0 26px rgba(200, 220, 255, 0.22), 0 1px 3px rgba(0, 0, 0, 0.55);
+}
+
+
+/* ============================================================
+   7. DESCRIPTION
+   Supporting sentence below the tagline.
+   Softer opacity — clearly secondary to the tagline.
+   Allows two-line wrap for longer sentences.
+   Starts invisible. JS adds .visible to reveal it.
+   ============================================================ */
+
+.herotext-description {
+    margin-top: -40px;
+    padding: 0;
+    font-family: 'Raleway', 'Segoe UI', sans-serif;
+    font-size: var(--desc-size);
+    font-weight: 300;
+    letter-spacing: 0.10em;
+    line-height: var(--desc-line-height);
+    color: var(--desc-color);
+    text-align: center;
+    max-width: var(--desc-max-width);
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.50);
+    /* ── Hidden state ────────────────────────────────────────── */
+    opacity: 0;
+    transform: translateY(8px);
+    /* ── Reveal transition ───────────────────────────────────── */
+    transition: opacity var(--reveal-dur) var(--reveal-ease) var(--reveal-delay), transform var(--reveal-dur) var(--reveal-ease) var(--reveal-delay);
+}
+
+
+/* Visible state — JS adds this class */
+
+.herotext-description.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+
+/* ============================================================
+   8. ENTER BUTTON SPACING WITHIN TEXT BLOCK
+   The Enter component renders its own .enter-wrap div.
+   When it lives inside .herotext-textblock, the flex gap
+   already handles spacing. This rule adds a tiny extra top
+   margin to visually separate the button from the description
+   — making the button feel "intentionally placed" rather than
+   just another row in the column.
+
+   CHANGE THIS to increase/decrease button separation from desc.
+   ============================================================ */
+
+.herotext-textblock .enter-wrap {
+    /* Extra separation above button beyond the normal --block-gap */
+    margin-top: 12px;
+    /* CHANGE THIS: increase for more breathing room  */
+    /* Override Enter.css positioning — inside the flex column,
+     position:absolute would take it out of flow.
+     Reset to relative so it stays IN the flex column flow.      */
+    position: relative;
+    top: auto;
+    left: auto;
+    transform: translateX(0) translateY(12px);
+    /* matches Enter.css hidden state */
+    /* Pointer events: re-enable so the button is clickable */
+    pointer-events: auto;
+}
+
+
+/* Visible state — same transform target as Enter.css but
+   adjusted for relative positioning inside flex column.         */
+
+.herotext-textblock .enter-wrap.visible {
+    opacity: 1;
+    transform: translateX(0) translateY(0);
+}
+
+
+/* ============================================================
+   9. RESPONSIVE OVERRIDES
+   On narrow screens, reduce font sizes and loosen spacing.
+   The canvas particle name scales with CFG.fontSize (fixed px)
+   so it may feel large on mobile — consider reducing
+   CFG.fontSize in HeroText.jsx for mobile-first builds.
+   ============================================================ */
+
+@media (max-width: 600px) {
+     :root {
+        /* CHANGE THESE for mobile text sizes */
+        --tagline-size: 10px;
+        --tagline-spacing: 0.22em;
+        --desc-size: 11px;
+        --block-gap: 18px;
+        --text-block-top: 58%;
+        /* push down slightly on small screens */
+    }
+    .herotext-tagline {
+        white-space: normal;
+        text-align: center;
+    }
+    .herotext-description {
+        max-width: 80vw;
+    }
+}
+
+@media (max-width: 380px) {
+     :root {
+        --tagline-size: 9px;
+        --desc-size: 10px;
+        --text-block-top: 60%;
+    }
+}

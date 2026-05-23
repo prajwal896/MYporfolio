@@ -1,0 +1,313 @@
+/* ============================================================
+   Enter.css
+   "Enter Portfolio" CTA button — cinematic, minimal, premium.
+
+   DESIGN LANGUAGE:
+   Capsule shape. Thin white border. Translucent fill.
+   No gradients, no bright colors, no heavy shadows.
+   The button communicates through restraint, not spectacle.
+
+   REVEAL:
+   Button shares the same fade-in mechanic as the tagline —
+   JS in HeroText.jsx adds the .visible class after particles
+   fully form. Before that it is completely invisible.
+
+   Z-INDEX:
+   z-index: 12 — one above the tagline (z:11), both above
+   the particle canvas (z:10), all below navbar (z:900).
+
+   TABLE OF CONTENTS:
+   1.  CSS Variables  (all tweakable values in one place)
+   2.  Outer positioning wrapper  (.enter-wrap)
+   3.  The anchor/button element  (.enter-btn)
+   4.  Border glow ring (::before pseudo-element)
+   5.  Button text span  (.enter-text)
+   6.  Hover state
+   7.  Active / click state
+   8.  Reveal animation  (.enter-wrap.visible)
+   9.  Reduced-motion override
+   10. Responsive — small screens
+   ============================================================ */
+
+
+/* ============================================================
+   1. CSS VARIABLES
+   Change these to retheme without hunting through the file.
+   ============================================================ */
+
+:root {
+    /* ── Sizing ────────────────────────────────────────────── */
+    --enter-padding-v: 13px;
+    /* top/bottom padding inside button     */
+    --enter-padding-h: 44px;
+    /* left/right padding — controls width  */
+    --enter-radius: 100px;
+    /* very large = fully capsule-shaped    */
+    /* ── Colors & opacity ─────────────────────────────────── */
+    --enter-bg: rgba(255, 255, 255, 0.040);
+    /* near-transparent fill     */
+    --enter-bg-hover: rgba(255, 255, 255, 0.075);
+    /* slightly brighter on hover*/
+    --enter-border: rgba(255, 255, 255, 0.220);
+    /* thin, low-opacity border  */
+    --enter-border-hover: rgba(255, 255, 255, 0.380);
+    /* border brightens on hover */
+    /* ── Glow (the ::before pseudo-element) ──────────────── */
+    --enter-glow: rgba(255, 255, 255, 0.06);
+    /* outer box-shadow glow     */
+    --enter-glow-hover: rgba(255, 255, 255, 0.13);
+    /* brighter glow on hover    */
+    /* ── Text ─────────────────────────────────────────────── */
+    --enter-text-color: rgba(255, 255, 255, 0.65);
+    --enter-text-color-hover: rgba(255, 255, 255, 0.92);
+    --enter-text-size: 10px;
+    --enter-text-spacing: 0.32em;
+    --enter-text-font: 'Raleway', 'Segoe UI', sans-serif;
+    /* ── Positioning — distance below tagline ────────────── */
+    /* The tagline sits at top: 58% (--tagline-top in HeroText.css).
+     This button wrapper sits at 58% + some offset below it.
+     Adjust --enter-top if you move the tagline.            */
+    --enter-top: 65.5%;
+    /* viewport % — tune to taste           */
+    /* ── Transitions ──────────────────────────────────────── */
+    --enter-dur: 0.55s;
+    --enter-ease: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    /* smooth, not bouncy */
+    /* ── Reveal animation (when .visible class is added) ─── */
+    --enter-reveal-dur: 1.50s;
+    --enter-reveal-ease: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    --enter-reveal-delay: 0.20s;
+    /* slight delay after tagline appears   */
+}
+
+
+/* ============================================================
+   2. OUTER POSITIONING WRAPPER
+   Absolutely positioned inside .herotext-wrap (fixed fullscreen).
+   Centers the button horizontally using left:50% + translateX(-50%).
+   Starts invisible; JS adds .visible to reveal it.
+   ============================================================ */
+
+.enter-wrap {
+    position: absolute;
+    top: var(--enter-top);
+    left: 50%;
+    /* Center horizontally — matches tagline and particle text alignment */
+    transform: translateX(-50%) translateY(12px);
+    /* Hidden until .visible — same pattern as .herotext-tagline */
+    opacity: 0;
+    /* Reveal transition */
+    transition: opacity var(--enter-reveal-dur) var(--enter-reveal-ease) var(--enter-reveal-delay), transform var(--enter-reveal-dur) var(--enter-reveal-ease) var(--enter-reveal-delay);
+    /* Sits above tagline (z:11) */
+    z-index: 12;
+    /* Allow pointer events on the button only, not the whole wrapper */
+    pointer-events: none;
+}
+
+
+/* Visible state — JS adds this class after particles fully form */
+
+.enter-wrap.visible {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
+
+
+/* ============================================================
+   3. THE ANCHOR / BUTTON ELEMENT
+   Capsule shaped. Translucent white background.
+   Border handled here; glow handled by ::before pseudo.
+   pointer-events: auto re-enables interaction (wrapper has none).
+   ============================================================ */
+
+.enter-btn {
+    /* Layout */
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--enter-padding-v) var(--enter-padding-h);
+    border-radius: var(--enter-radius);
+    /* Prevent text wrapping */
+    white-space: nowrap;
+    /* Reset anchor styles */
+    text-decoration: none;
+    outline: none;
+    /* Fill */
+    background: var(--enter-bg);
+    /* Border — thin, delicate, low opacity */
+    border: 1px solid var(--enter-border);
+    /* Subtle backdrop blur for the frosted glass feel.
+     This is very light — just enough to catch the gradient
+     colors beneath without looking like heavy glassmorphism. */
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    /* Smooth all property changes */
+    transition: background var(--enter-dur) var(--enter-ease), border-color var(--enter-dur) var(--enter-ease), transform var(--enter-dur) var(--enter-ease), box-shadow var(--enter-dur) var(--enter-ease);
+    /* Position context for ::before glow ring */
+    position: relative;
+    overflow: visible;
+    /* Enable pointer events (wrapper has pointer-events: none) */
+    pointer-events: auto;
+    /* Cursor */
+    cursor: pointer;
+    /* GPU compositing hint for smooth hover lift */
+    will-change: transform;
+}
+
+
+/* ============================================================
+   4. BORDER GLOW RING  (::before pseudo-element)
+   A very faint box-shadow outside the border.
+   Gives the button a soft atmospheric presence without looking
+   like a neon light. Stays subtle at rest, slightly brightens
+   on hover.
+   ============================================================ */
+
+.enter-btn::before {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    /* just outside the border              */
+    border-radius: var(--enter-radius);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    /* Outer glow — very faint box shadow */
+    box-shadow: 0 0 18px 1px var(--enter-glow), 0 0 40px 2px rgba(255, 255, 255, 0.025);
+    /* Transition glow on hover */
+    transition: box-shadow var(--enter-dur) var(--enter-ease);
+    pointer-events: none;
+    /* doesn't interfere with clicks        */
+}
+
+
+/* ============================================================
+   5. BUTTON TEXT SPAN
+   Uppercase, thin weight, wide letter-spacing.
+   The text does NOT use text-transform in JS — it is handled
+   here purely in CSS so you can override it per breakpoint.
+   ============================================================ */
+
+.enter-text {
+    font-family: var(--enter-text-font);
+    font-size: var(--enter-text-size);
+    font-weight: 300;
+    letter-spacing: var(--enter-text-spacing);
+    text-transform: uppercase;
+    color: var(--enter-text-color);
+    /* Extremely faint text-shadow for depth on dark backgrounds */
+    text-shadow: 0 0 12px rgba(255, 255, 255, 0.12), 0 1px 3px rgba(0, 0, 0, 0.50);
+    /* Smooth color transition */
+    transition: color var(--enter-dur) var(--enter-ease);
+    /* Prevent the letter-spacing from adding trailing space */
+    display: block;
+}
+
+
+/* ============================================================
+   6. HOVER STATE
+   Button lifts upward by 3px — subtle, not bouncy.
+   Background and border become slightly more opaque.
+   Glow brightens minimally.
+   Text becomes slightly more visible.
+   All changes are smooth and linear-feeling due to ease curve.
+   ============================================================ */
+
+.enter-btn:hover {
+    background: var(--enter-bg-hover);
+    border-color: var(--enter-border-hover);
+    /* Lift — translateY(-3px) feels premium without spring-bounce */
+    transform: translateY(-3px);
+    /* Very subtle drop shadow on hover — gives lift physical weight */
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
+}
+
+
+/* Glow ring brightens on hover */
+
+.enter-btn:hover::before {
+    box-shadow: 0 0 24px 2px var(--enter-glow-hover), 0 0 50px 4px rgba(255, 255, 255, 0.04);
+}
+
+
+/* Text becomes more opaque */
+
+.enter-btn:hover .enter-text {
+    color: var(--enter-text-color-hover);
+    text-shadow: 0 0 20px rgba(255, 255, 255, 0.22), 0 1px 3px rgba(0, 0, 0, 0.50);
+}
+
+
+/* ============================================================
+   7. ACTIVE / CLICK STATE
+   A tiny scale-down so the button feels physically "pressed."
+   Scale is very small — 0.97 — not cartoon-bouncy.
+   ============================================================ */
+
+.enter-btn:active {
+    transform: translateY(-1px) scale(0.97);
+    background: rgba(255, 255, 255, 0.030);
+    /* Remove the lift shadow on press */
+    box-shadow: none;
+    /* Instant response — no delay on press */
+    transition-duration: 0.10s;
+}
+
+
+/* ============================================================
+   8. REVEAL ANIMATION — .visible STATE
+   Covered in section 2 above (.enter-wrap.visible).
+   Documented here for clarity:
+   When JS calls:
+     buttonWrapRef.current.classList.add("visible")
+   The wrapper transitions from:
+     opacity: 0, transform: translateX(-50%) translateY(12px)
+   to:
+     opacity: 1, transform: translateX(-50%) translateY(0)
+   ============================================================ */
+
+
+/* ============================================================
+   9. REDUCED MOTION OVERRIDE
+   Users who prefer reduced motion get no movement animation.
+   The button is still visible but doesn't fly in or lift.
+   ============================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+    .enter-wrap {
+        transition: opacity 0.30s ease;
+        transform: translateX(-50%) translateY(0) !important;
+    }
+    .enter-btn {
+        transition: background 0.20s ease, border-color 0.20s ease;
+        transform: none !important;
+    }
+    .enter-btn:hover {
+        transform: none;
+    }
+}
+
+
+/* ============================================================
+   10. RESPONSIVE — small screens
+   Reduce padding and text size on narrow viewports.
+   --enter-top pushes button lower on small screens since the
+   tagline may wrap and occupy more vertical space.
+   ============================================================ */
+
+@media (max-width: 480px) {
+     :root {
+        --enter-padding-v: 11px;
+        --enter-padding-h: 34px;
+        --enter-text-size: 9.5px;
+        --enter-text-spacing: 0.26em;
+        --enter-top: 67%;
+    }
+}
+
+@media (max-width: 360px) {
+     :root {
+        --enter-padding-v: 10px;
+        --enter-padding-h: 28px;
+        --enter-text-size: 9px;
+        --enter-top: 69%;
+    }
+}

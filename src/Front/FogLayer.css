@@ -1,0 +1,302 @@
+/* ============================================================
+   FogLayer.css
+   Ultra-subtle cinematic atmospheric fog/smoke overlay.
+   Pure CSS — no canvas, no JS animation libraries.
+
+   DESIGN PHILOSOPHY:
+   Each fog "puff" is a large blurred div with a radial gradient
+   fill. Blur + low opacity + slow transforms = cinematic depth.
+   Multiple layers moving at different speeds create parallax.
+
+   Z-INDEX STACK (this component slots between layers):
+     Background    z: 0
+     FogLayer      z: 5   ← sits above background, below hero text
+     HeroText      z: 10
+     Navbar        z: 900
+
+   TABLE OF CONTENTS:
+   1.  CSS Variables  (all timing, opacity, sizing in one place)
+   2.  Fog container  (fullscreen fixed wrapper)
+   3.  Shared fog puff rules  (.fog-puff base class)
+   4.  Layer 1 — deep low ground fog  (slowest, lowest)
+   5.  Layer 2 — mid-screen drift  (medium speed, left→right)
+   6.  Layer 3 — upper wisp  (fastest of the four, very faint)
+   7.  Layer 4 — wide ambient veil  (full-width, barely moves)
+   8.  Keyframe animations
+   9.  Mouse-parallax utility classes  (applied by JS in FogLayer.jsx)
+   10. Reduced-motion override  (accessibility)
+   ============================================================ */
+
+
+/* ============================================================
+   1. CSS VARIABLES
+   Single place to control every tunable number.
+   ============================================================ */
+:root {
+  /* Master opacity multipliers — lower = more subtle
+     Adjust these first if fog feels too strong or too weak      */
+  --fog-opacity-l1: 0.055;   /* Layer 1 — ground fog             */
+  --fog-opacity-l2: 0.045;   /* Layer 2 — mid drift              */
+  --fog-opacity-l3: 0.030;   /* Layer 3 — upper wisp             */
+  --fog-opacity-l4: 0.035;   /* Layer 4 — wide ambient veil      */
+
+  /* Blur amounts — high blur = soft, painterly, cinematic       */
+  --fog-blur-l1:  90px;
+  --fog-blur-l2:  110px;
+  --fog-blur-l3:  80px;
+  --fog-blur-l4:  140px;
+
+  /* Animation durations — all very slow for cinematic feel      */
+  --fog-dur-l1:  38s;   /* slowest — ground fog barely moves     */
+  --fog-dur-l2:  28s;   /* medium                                */
+  --fog-dur-l3:  22s;   /* slightly faster wisp                  */
+  --fog-dur-l4:  50s;   /* ambient veil — almost imperceptible   */
+
+  /* Parallax shift applied by JS mouse handler (px)             */
+  --fog-parallax-l1: 8px;
+  --fog-parallax-l2: 14px;
+  --fog-parallax-l3: 20px;
+  --fog-parallax-l4: 5px;
+
+  /* Easing shared across all fog animations                     */
+  --fog-ease: ease-in-out;
+}
+
+
+/* ============================================================
+   2. FOG CONTAINER
+   Fixed, fullscreen, pointer-events none so nothing underneath
+   is blocked. Overflow hidden clips fog puffs as they drift.
+   ============================================================ */
+.fog-container {
+  position:       fixed;
+  inset:          0;
+  width:          100vw;
+  height:         100vh;
+  overflow:       hidden;
+  pointer-events: none;         /* never intercepts mouse/touch   */
+  z-index:        5;            /* above background, below text   */
+
+  /* Mix-blend-mode screen: fog brightens rather than covers,
+     blending naturally with the dark gradient below.
+     Change to 'normal' if it looks too bright on your display.  */
+  mix-blend-mode: screen;
+}
+
+
+/* ============================================================
+   3. SHARED FOG PUFF BASE CLASS
+   All four layers share these foundational properties.
+   Individual layers override position, size, color, timing.
+   ============================================================ */
+.fog-puff {
+  position:         absolute;
+  border-radius:    50%;           /* perfectly round before blur   */
+  will-change:      transform;     /* GPU hint for smooth animation */
+  /* backface-visibility prevents sub-pixel flicker on some GPUs  */
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+
+/* ============================================================
+   4. LAYER 1 — DEEP LOW GROUND FOG
+   Sits along the bottom third of the screen.
+   Very slow horizontal drift with a gentle vertical pulse.
+   The red-tinted gradient complements the background's red base.
+   ============================================================ */
+.fog-l1 {
+  /* Large — spans well beyond viewport edges so no hard clip     */
+  width:  160vw;
+  height: 60vh;
+
+  /* Anchored near bottom-left, drifts right                      */
+  bottom: -15vh;
+  left:   -30vw;
+
+  /* Red-warm tint to blend with the bottom red gradient          */
+  background: radial-gradient(
+    ellipse at 40% 60%,
+    rgba(180, 40, 20,  var(--fog-opacity-l1)) 0%,
+    rgba(140, 25, 15,  calc(var(--fog-opacity-l1) * 0.55)) 35%,
+    rgba(80,  10,  8,  calc(var(--fog-opacity-l1) * 0.20)) 65%,
+    transparent 100%
+  );
+
+  filter:  blur(var(--fog-blur-l1));
+  opacity: 1;   /* opacity lives inside the gradient stops above  */
+
+  /* CSS custom property used by JS parallax nudge               */
+  --px: 0px;
+  --py: 0px;
+
+  animation: fogDriftL1 var(--fog-dur-l1) var(--fog-ease) infinite alternate;
+  /* alternate: drifts right, reverses back — seamless, no jump   */
+}
+
+
+/* ============================================================
+   5. LAYER 2 — MID-SCREEN DRIFT
+   Cooler, darker hue — nearly neutral so it works with both
+   the black upper area and the red lower area.
+   Moves slightly faster and in a different direction than L1.
+   ============================================================ */
+.fog-l2 {
+  width:  140vw;
+  height: 55vh;
+
+  /* Starts center-right, drifts left                            */
+  top:   25vh;
+  right: -40vw;
+
+  /* Very dark near-neutral — depth without colour clash         */
+  background: radial-gradient(
+    ellipse at 55% 45%,
+    rgba(120, 30, 18,  var(--fog-opacity-l2)) 0%,
+    rgba(80,  18, 12,  calc(var(--fog-opacity-l2) * 0.50)) 40%,
+    rgba(40,   8,  6,  calc(var(--fog-opacity-l2) * 0.18)) 70%,
+    transparent 100%
+  );
+
+  filter:  blur(var(--fog-blur-l2));
+
+  --px: 0px;
+  --py: 0px;
+
+  animation: fogDriftL2 var(--fog-dur-l2) var(--fog-ease) infinite alternate;
+  /* Stagger start so L1 and L2 don't move in lockstep           */
+  animation-delay: -9s;
+}
+
+
+/* ============================================================
+   6. LAYER 3 — UPPER WISP
+   Faintest layer. Lives in the upper-mid screen area.
+   Barely perceptible — adds depth without competing with navbar
+   or hero text. Moves diagonally.
+   ============================================================ */
+.fog-l3 {
+  width:  120vw;
+  height: 45vh;
+
+  /* Upper area — keeps clear of hero text center                */
+  top:  5vh;
+  left: 10vw;
+
+  /* Almost pure dark — just barely lighter than background       */
+  background: radial-gradient(
+    ellipse at 50% 50%,
+    rgba(90, 20, 12,  var(--fog-opacity-l3)) 0%,
+    rgba(50, 10,  8,  calc(var(--fog-opacity-l3) * 0.45)) 45%,
+    transparent 80%
+  );
+
+  filter:  blur(var(--fog-blur-l3));
+
+  --px: 0px;
+  --py: 0px;
+
+  animation: fogDriftL3 var(--fog-dur-l3) var(--fog-ease) infinite alternate;
+  animation-delay: -16s;
+}
+
+
+/* ============================================================
+   7. LAYER 4 — WIDE AMBIENT VEIL
+   Fullscreen wide band that barely moves.
+   Acts as a soft unified atmospheric overlay tying all layers
+   together. The slowest animation — practically imperceptible
+   movement, more of a breathing presence.
+   ============================================================ */
+.fog-l4 {
+  width:  200vw;
+  height: 80vh;
+
+  /* Centers vertically so it influences the whole scene         */
+  top:  10vh;
+  left: -50vw;
+
+  /* Very wide, very soft gradient — dark red to transparent      */
+  background: radial-gradient(
+    ellipse at 50% 50%,
+    rgba(100, 22, 14,  var(--fog-opacity-l4)) 0%,
+    rgba(60,  14,  8,  calc(var(--fog-opacity-l4) * 0.40)) 50%,
+    transparent 85%
+  );
+
+  filter:  blur(var(--fog-blur-l4));
+
+  --px: 0px;
+  --py: 0px;
+
+  animation: fogDriftL4 var(--fog-dur-l4) var(--fog-ease) infinite alternate;
+  animation-delay: -25s;
+}
+
+
+/* ============================================================
+   8. KEYFRAME ANIMATIONS
+   All use translate only (GPU-composited, no layout reflow).
+   Alternate direction: no visible loop seam.
+   Distances are small — fog barely moves.
+   ============================================================ */
+
+/* Layer 1 — slow rightward drift with subtle vertical sway     */
+@keyframes fogDriftL1 {
+  0%   { transform: translate(calc(0px   + var(--px)), calc(0px   + var(--py))); }
+  30%  { transform: translate(calc(18px  + var(--px)), calc(-6px  + var(--py))); }
+  60%  { transform: translate(calc(28px  + var(--px)), calc(4px   + var(--py))); }
+  100% { transform: translate(calc(38px  + var(--px)), calc(-10px + var(--py))); }
+}
+
+/* Layer 2 — leftward drift, slightly higher vertical range     */
+@keyframes fogDriftL2 {
+  0%   { transform: translate(calc(0px   + var(--px)), calc(0px   + var(--py))); }
+  25%  { transform: translate(calc(-14px + var(--px)), calc(8px   + var(--py))); }
+  75%  { transform: translate(calc(-30px + var(--px)), calc(-5px  + var(--py))); }
+  100% { transform: translate(calc(-42px + var(--px)), calc(12px  + var(--py))); }
+}
+
+/* Layer 3 — diagonal drift, smallest travel distance           */
+@keyframes fogDriftL3 {
+  0%   { transform: translate(calc(0px   + var(--px)), calc(0px  + var(--py))); }
+  40%  { transform: translate(calc(12px  + var(--px)), calc(-8px + var(--py))); }
+  100% { transform: translate(calc(22px  + var(--px)), calc(6px  + var(--py))); }
+}
+
+/* Layer 4 — barely moves, just breathes                        */
+@keyframes fogDriftL4 {
+  0%   { transform: translate(calc(0px  + var(--px)), calc(0px  + var(--py))); }
+  50%  { transform: translate(calc(10px + var(--px)), calc(-4px + var(--py))); }
+  100% { transform: translate(calc(18px + var(--px)), calc(6px  + var(--py))); }
+}
+
+
+/* ============================================================
+   9. MOUSE PARALLAX UTILITY
+   JS in FogLayer.jsx reads mouse position and applies small
+   CSS custom property overrides per layer.
+   Each layer has a different --fog-parallax-lN multiplier
+   (set in :root above) to create depth separation.
+   The actual property updates happen in JS; this comment
+   documents the convention so future edits are clear.
+
+   Convention used by JS:
+     element.style.setProperty('--px', `${offsetX}px`);
+     element.style.setProperty('--py', `${offsetY}px`);
+
+   The keyframe animations already include var(--px) / var(--py)
+   in their translate values, so parallax is additive.
+   ============================================================ */
+
+
+/* ============================================================
+   10. REDUCED MOTION OVERRIDE
+   Respects system-level "prefer reduced motion" setting.
+   Fog layers become completely static (no animation).
+   ============================================================ */
+@media (prefers-reduced-motion: reduce) {
+  .fog-puff {
+    animation: none !important;
+  }
+}

@@ -1,0 +1,292 @@
+/* ============================================================
+   BACKGROUND.CSS
+   Cinematic animated background for portfolio landing page.
+   
+   Layer order (bottom → top):
+     1. .bg-gradient   — base smoky gradient (z-index: 0)
+     2. .bg-smoke      — moving fog blobs    (z-index: 1)
+     3. .bg-particles  — golden sparkles     (z-index: 2)
+   
+   The entire .bg-root sits fixed behind all page content.
+   Import this file only inside Background.jsx.
+   ============================================================ */
+
+
+/* ============================================================
+   § DESIGN TOKENS
+   Centralised colour / timing values.
+   Edit these to repaint the whole background at once.
+   ============================================================ */
+
+:root {
+    /* Core palette */
+    --bg-deep-black: #080608;
+    /* top of gradient — near-black */
+    --bg-dark-maroon: #1a0408;
+    /* mid gradient    — very dark red */
+    --bg-cinematic-red: #3d0b10;
+    /* lower mid       — rich cinema red */
+    --bg-ember-red: #5c1018;
+    /* bottom          — deep ember glow */
+    /* Golden particle colour */
+    --particle-gold: #e8c97a;
+    /* Smoke blob colour — nearly transparent warm grey */
+    --smoke-tint: rgba(90, 30, 20, 0.18);
+    /* Shared easing */
+    --ease-sine: cubic-bezier(0.45, 0, 0.55, 1);
+}
+
+
+/* ============================================================
+   § ROOT WRAPPER
+   Fixed, fullscreen, behind everything else on the page.
+   pointer-events: none so it never intercepts clicks.
+   ============================================================ */
+
+.bg-root {
+    position: fixed;
+    inset: 0;
+    /* top/right/bottom/left: 0 */
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    z-index: 0;
+    /* sits behind all page content */
+    pointer-events: none;
+    user-select: none;
+}
+
+
+/* ============================================================
+   § LAYER 1 — BASE GRADIENT
+   Rich vertical gradient: deep black top → cinematic reds bottom.
+   The extra radial overlay adds a subtle central "depth sink".
+   ============================================================ */
+
+.bg-gradient {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    /* Main linear gradient — top to bottom */
+    background: /* Radial vignette: darkens corners for cinematic framing */
+    radial-gradient( ellipse 120% 100% at 50% 50%, transparent 40%, rgba(4, 1, 3, 0.55) 100%), /* Primary vertical gradient */
+    linear-gradient( to bottom, var(--bg-deep-black) 0%, var(--bg-dark-maroon) 35%, var(--bg-cinematic-red) 70%, var(--bg-ember-red) 100%);
+}
+
+
+/* ============================================================
+   § LAYER 2 — SMOKE / FOG
+   Three large, blurred, slowly-drifting blobs.
+   mix-blend-mode: screen keeps them additive and soft.
+   ============================================================ */
+
+.bg-smoke {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+}
+
+
+/* Shared blob base */
+
+.bg-smoke__blob {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(90px);
+    /* heavy blur = soft fog look */
+    mix-blend-mode: screen;
+    opacity: 0;
+    /* animated to opacity in keyframes */
+    will-change: transform, opacity;
+}
+
+
+/* ── Blob A: lower-left, drifts up-right ── */
+
+.bg-smoke__blob--a {
+    width: 65vw;
+    height: 55vh;
+    background: radial-gradient(ellipse, var(--smoke-tint) 0%, transparent 70%);
+    bottom: -10%;
+    left: -15%;
+    animation: smokeA 38s var(--ease-sine) infinite;
+}
+
+
+/* ── Blob B: lower-right, drifts up-left ── */
+
+.bg-smoke__blob--b {
+    width: 55vw;
+    height: 50vh;
+    background: radial-gradient(ellipse, var(--smoke-tint) 0%, transparent 70%);
+    bottom: -5%;
+    right: -10%;
+    animation: smokeB 45s var(--ease-sine) infinite;
+    animation-delay: -14s;
+    /* offset so blobs are never in sync */
+}
+
+
+/* ── Blob C: centre, breathes in place ── */
+
+.bg-smoke__blob--c {
+    width: 70vw;
+    height: 45vh;
+    background: radial-gradient(ellipse, rgba(80, 15, 10, 0.12) 0%, transparent 70%);
+    bottom: 10%;
+    left: 15%;
+    animation: smokeC 52s var(--ease-sine) infinite;
+    animation-delay: -28s;
+}
+
+
+/* Smoke keyframes — ultra slow drift, peak opacity kept very low */
+
+@keyframes smokeA {
+    0% {
+        transform: translate(0, 0) scale(1);
+        opacity: 0;
+    }
+    20% {
+        opacity: 0.9;
+    }
+    50% {
+        transform: translate(8vw, -6vh) scale(1.08);
+        opacity: 0.7;
+    }
+    80% {
+        opacity: 0.9;
+    }
+    100% {
+        transform: translate(0, 0) scale(1);
+        opacity: 0;
+    }
+}
+
+@keyframes smokeB {
+    0% {
+        transform: translate(0, 0) scale(1);
+        opacity: 0;
+    }
+    20% {
+        opacity: 0.8;
+    }
+    50% {
+        transform: translate(-6vw, -8vh) scale(1.1);
+        opacity: 0.65;
+    }
+    80% {
+        opacity: 0.8;
+    }
+    100% {
+        transform: translate(0, 0) scale(1);
+        opacity: 0;
+    }
+}
+
+@keyframes smokeC {
+    0% {
+        transform: scale(1) translateY(0);
+        opacity: 0;
+    }
+    25% {
+        opacity: 0.6;
+    }
+    50% {
+        transform: scale(1.06) translateY(-4vh);
+        opacity: 0.5;
+    }
+    75% {
+        opacity: 0.6;
+    }
+    100% {
+        transform: scale(1) translateY(0);
+        opacity: 0;
+    }
+}
+
+
+/* ============================================================
+   § LAYER 3 — GOLDEN PARTICLES
+   The <span> elements are injected by Background.jsx via JS.
+   CSS handles the shared style and the float animation.
+   Each particle gets its own duration/delay/size via inline styles.
+   ============================================================ */
+
+.bg-particles {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+}
+
+
+/* Individual particle */
+
+.bg-particle {
+    position: absolute;
+    display: block;
+    border-radius: 50%;
+    background: var(--particle-gold);
+    /* Soft golden glow — two layered box-shadows */
+    box-shadow: 0 0 4px 1px rgba(232, 201, 122, 0.55), 0 0 10px 2px rgba(232, 201, 122, 0.18);
+    will-change: transform, opacity;
+    animation: particleFloat linear infinite;
+    /* duration, delay, opacity, and --drift-x are set inline per particle */
+}
+
+
+/*
+  particleFloat:
+  - Particle rises upward (negative Y) across the full viewport height.
+  - Drifts horizontally by --drift-x (randomised per particle, set inline).
+  - Fades in then out for a natural sparkle feel.
+*/
+
+@keyframes particleFloat {
+    0% {
+        transform: translate(0, 0) scale(0.8);
+        opacity: 0;
+    }
+    10% {
+        opacity: 1;
+        /* quick fade-in */
+    }
+    80% {
+        opacity: 0.6;
+    }
+    100% {
+        transform: translate(var(--drift-x, 0px), -105vh) scale(1.1);
+        opacity: 0;
+        /* fade out as it leaves viewport */
+    }
+}
+
+
+/* ============================================================
+   § PERFORMANCE HINTS
+   Promote composited layers to the GPU for smoother animation.
+   Applied only to animated elements to avoid unnecessary layers.
+   ============================================================ */
+
+.bg-gradient,
+.bg-smoke__blob,
+.bg-particle {
+    transform: translateZ(0);
+    /* force GPU compositing */
+}
+
+
+/* ============================================================
+   § REDUCED MOTION ACCESSIBILITY
+   Respects OS-level "reduce motion" preference.
+   Keeps the static gradient but disables all animation.
+   ============================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+    .bg-smoke__blob,
+    .bg-particle {
+        animation: none !important;
+        opacity: 0 !important;
+        /* hide moving elements entirely */
+    }
+}
