@@ -15,7 +15,7 @@
 // ============================================================
 
 import { useState, useRef, useEffect } from "react";
-import "./Services.css";
+import "./services.css";
 
 // ─────────────────────────────────────────────────────────────
 // LAYOUT CONFIG
