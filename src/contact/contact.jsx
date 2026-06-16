@@ -4,7 +4,7 @@
 // ============================================================
 
 import React from "react";
-import "./Contact.css";
+import "./contact.css";
 
 // ── Icon Components (inline SVG — no extra dependencies) ───
 
