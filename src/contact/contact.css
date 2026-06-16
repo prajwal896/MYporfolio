@@ -1,0 +1,423 @@
+/* ============================================================
+   Contact.css — Premium Cinematic Contact Section
+   Designed to blend with existing dark glassmorphism aesthetic
+   ============================================================ */
+
+
+/* ── Section Wrapper ─────────────────────────────────────── */
+
+.contact-section {
+    position: relative;
+    width: 100%;
+    padding: 40px 24px 140px;
+    overflow: hidden;
+    background: transparent;
+    /* Inherits site background */
+}
+
+
+/* ── Ambient Background Glow ─────────────────────────────── */
+
+.contact-section__bg-glow {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    /* Subtle warm glow — consistent with existing cinematic palette */
+    background: radial-gradient(ellipse 60% 40% at 50% 80%, rgba(180, 60, 20, 0.10) 0%, transparent 70%), radial-gradient(ellipse 40% 30% at 20% 20%, rgba(200, 80, 30, 0.05) 0%, transparent 60%);
+}
+
+
+/* ── Inner Container ─────────────────────────────────────── */
+
+.contact-section__inner {
+    position: relative;
+    z-index: 1;
+    max-width: 1000px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+    justify-content: flex-start;
+    padding-top: 0;
+}
+
+
+/* ── Top Label ───────────────────────────────────────────── */
+
+.contact-section__label {
+    display: inline-block;
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: rgba(220, 100, 50, 0.85);
+    margin-bottom: 10px;
+    /* Subtle shimmer underline */
+    padding-bottom: 6px;
+    border-bottom: 1px solid rgba(220, 100, 50, 0.25);
+}
+
+
+/* ── Main Heading ────────────────────────────────────────── */
+
+.contact-section__heading {
+    font-size: clamp(2.2rem, 5vw, 3.6rem);
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    text-align: center;
+    color: rgba(255, 255, 255, 0.94);
+    margin: 0 0 10px;
+}
+
+
+/* ── Subheading ──────────────────────────────────────────── */
+
+.contact-section__subheading {
+    font-size: clamp(0.88rem, 1.8vw, 1rem);
+    font-weight: 400;
+    line-height: 1.7;
+    text-align: center;
+    color: rgba(255, 255, 255, 0.42);
+    max-width: 520px;
+    margin: 0 0 35px;
+}
+
+
+/* ── Contact Cards Grid ──────────────────────────────────── */
+
+.contact-section__cards {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    width: 85%;
+    margin-bottom: 20px;
+}
+
+
+/* ── Individual Glass Card ───────────────────────────────── */
+
+.contact-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 24px 26px;
+    cursor: pointer;
+    text-decoration: none;
+    /* Glassmorphism — same recipe as services section */
+    background: rgba(255, 255, 255, 0.035);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 16px;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    /* Transitions */
+    transition: transform 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94), background 0.35s ease, border-color 0.35s ease, box-shadow 0.35s ease;
+}
+
+
+/* Hover state */
+
+.contact-card:hover {
+    transform: translateY(-5px);
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(220, 100, 50, 0.28);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35), 0 0 30px rgba(200, 70, 30, 0.10), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+
+/* Subtle top edge highlight on hover */
+
+.contact-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 10%;
+    width: 80%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255, 120, 60, 0.4), transparent);
+    opacity: 0;
+    transition: opacity 0.35s ease;
+    border-radius: 50%;
+}
+
+.contact-card:hover::before {
+    opacity: 1;
+}
+
+
+/* ── Card Icon Wrapper ───────────────────────────────────── */
+
+.contact-card__icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.09);
+    color: rgba(220, 100, 50, 0.90);
+    transition: background 0.3s ease, color 0.3s ease;
+    flex-shrink: 0;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.contact-card:hover .contact-card__icon {
+    background: rgba(220, 100, 50, 0.12);
+    color: rgba(240, 130, 60, 1);
+}
+
+.contact-card__icon svg {
+    width: 18px;
+    height: 18px;
+    stroke-width: 1.75;
+}
+
+
+/* ── Card Text ───────────────────────────────────────────── */
+
+.contact-card__title {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.88);
+    letter-spacing: 0.01em;
+    margin: 0;
+}
+
+.contact-card__desc {
+    font-size: 0.80rem;
+    font-weight: 400;
+    color: rgba(255, 255, 255, 0.38);
+    line-height: 1.5;
+    margin: 0;
+}
+
+
+/* ── Trust Line ──────────────────────────────────────────── */
+
+.contact-section__trust {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.78rem;
+    color: rgba(255, 255, 255, 0.32);
+    letter-spacing: 0.04em;
+    margin-bottom: 4vh;
+}
+
+
+/* Green availability dot */
+
+.contact-section__trust-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: rgba(80, 200, 120, 0.85);
+    box-shadow: 0 0 8px rgba(80, 200, 120, 0.5);
+    flex-shrink: 0;
+    /* Soft pulse */
+    animation: trust-pulse 2.8s ease-in-out infinite;
+}
+
+@keyframes trust-pulse {
+    0%,
+    100% {
+        opacity: 1;
+        box-shadow: 0 0 8px rgba(80, 200, 120, 0.5);
+    }
+    50% {
+        opacity: 0.6;
+        box-shadow: 0 0 14px rgba(80, 200, 120, 0.3);
+    }
+}
+
+
+/* ── Process Row ─────────────────────────────────────────── */
+
+.contact-section__process {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    width: 100%;
+    max-width: 780px;
+    margin-bottom: 72px;
+}
+
+.process-step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    flex: 1;
+    position: relative;
+    margin-bottom: -5%;
+}
+
+
+/* Connector line between steps */
+
+.process-step:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    top: 11px;
+    /* Aligns with number vertical center */
+    right: -50%;
+    width: 100%;
+    height: 1px;
+    background: linear-gradient(90deg, rgba(255, 255, 255, 0.10) 0%, rgba(255, 255, 255, 0.04) 100%);
+}
+
+.process-step__number {
+    font-size: 0.62rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    color: rgba(220, 100, 50, 0.70);
+    margin-bottom: 2px;
+}
+
+.process-step__label {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.45);
+    letter-spacing: 0.02em;
+    text-align: center;
+    white-space: nowrap;
+}
+
+
+/* ── CTA Button ──────────────────────────────────────────── */
+
+.contact-section__cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 16px 40px;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    /* Warm cinematic gradient */
+    background: linear-gradient(135deg, rgba(200, 70, 30, 0.90) 0%, rgba(230, 110, 40, 0.85) 100%);
+    border: 1px solid rgba(240, 120, 50, 0.30);
+    border-radius: 50px;
+    font-size: 0.90rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    color: rgba(255, 255, 255, 0.95);
+    box-shadow: 0 8px 32px rgba(180, 60, 20, 0.30), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+    transition: transform 0.30s cubic-bezier(0.25, 0.46, 0.45, 0.94), box-shadow 0.30s ease, background 0.30s ease;
+}
+
+.contact-section__cta:hover {
+    transform: translateY(-4px);
+    background: linear-gradient(135deg, rgba(220, 80, 35, 0.95) 0%, rgba(245, 125, 50, 0.92) 100%);
+    box-shadow: 0 16px 48px rgba(180, 60, 20, 0.45), 0 0 40px rgba(220, 90, 40, 0.20), inset 0 1px 0 rgba(255, 255, 255, 0.16);
+}
+
+.contact-section__cta:active {
+    transform: translateY(-1px);
+}
+
+
+/* Button icon */
+
+.contact-section__cta svg {
+    width: 18px;
+    height: 18px;
+    stroke-width: 2;
+    transition: transform 0.25s ease;
+}
+
+.contact-section__cta:hover svg {
+    transform: translateX(2px);
+}
+
+
+/* ── Responsive — Tablet ─────────────────────────────────── */
+
+@media (max-width: 768px) {
+    .contact-section {
+        padding: 90px 20px 110px;
+    }
+    .contact-section__cards {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+    .contact-card {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        gap: 12px;
+    }
+    .contact-card__text {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        width: 100%;
+    }
+    .contact-section__process {
+        gap: 0;
+        overflow-x: auto;
+        padding-bottom: 4px;
+        /* Scrollable on smaller tablets if needed */
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+    }
+    .contact-section__process::-webkit-scrollbar {
+        display: none;
+    }
+}
+
+
+/* ── Responsive — Mobile ─────────────────────────────────── */
+
+@media (max-width: 480px) {
+    .contact-section {
+        padding: 72px 16px 90px;
+    }
+    .contact-section__heading {
+        font-size: 2rem;
+    }
+    .contact-section__subheading {
+        font-size: 0.85rem;
+        margin-bottom: 48px;
+    }
+    .contact-section__process {
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 10px 20px;
+        max-width: 100%;
+        margin-bottom: 15px;
+    }
+    .process-step:not(:last-child)::after {
+        display: none;
+        /* Hide connectors on mobile wrap */
+    }
+    .process-step__label {
+        white-space: normal;
+        text-align: center;
+        max-width: 70px;
+        line-height: 1.3;
+    }
+    .contact-section__cta {
+        padding: 15px 15px;
+        font-size: 0.85rem;
+        width: 100%;
+        max-width: 320px;
+        justify-content: center;
+    }
+    .contact-section__cards {
+        margin-bottom: 28px;
+    }
+    .contact-section__trust {
+        margin-bottom: 48px;
+    }
+}

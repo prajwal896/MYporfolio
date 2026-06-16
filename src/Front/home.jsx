@@ -7,10 +7,7 @@ import FogLayer from './FogLayer'
 const home = () => {
 return (
     <>
-    <Background />
-    <FogLayer />
     <HeroText />
-    <Navbar />
     </>
 )
 }

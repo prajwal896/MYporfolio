@@ -4,7 +4,7 @@
    Dots are placed ON the circular arc via JS polar math.
    This file handles ONLY visual styling & transitions.
    All positional math lives in Navbar.jsx.
-const edge
+
    TABLE OF CONTENTS:
    1.  CSS Variables
    2.  Viewport anchor
@@ -65,8 +65,8 @@ const edge
 
 .navbar-anchor {
     position: fixed;
-    top: -200px;
-    left: -200px;
+    top: 0;
+    left: 0;
     overflow: visible;
     z-index: 900;
     /* pointer-events only where scene content exists */
@@ -85,8 +85,8 @@ const edge
 
 .navbar-scene {
     position: absolute;
-    top: 0;
-    left: 0;
+    top: -33vh;
+    left: -15vw;
     /* width/height set inline from CFG.diameter */
     pointer-events: none;
     /* children enable their own events */
@@ -352,4 +352,126 @@ const edge
 .navbar-item:active .dot-core {
     transform: scale(1.10);
     background: rgba(255, 255, 255, 0.70);
+}
+
+
+/* ============================================================
+   15. NAV ICON WRAPPER  (.nav-icon-wrap)
+   Replaces the old .dot-ring + .dot-core span pair.
+   Same visual footprint — a circular zone on the arc.
+
+   The wrapper provides the glow ring background (::before)
+   and a soft inner halo (::after).
+   The actual SVG icon sits on top as .nav-icon.
+
+   CHANGE --icon-size to resize icons globally.
+   CHANGE the opacity values below to make icons more/less visible.
+   ============================================================ */
+
+:root {
+    /* CHANGE THIS to resize all icons at once */
+    --icon-size: 15px;
+    /* Idle opacity — keep low for the translucent glass aesthetic */
+    --icon-idle-opacity: 0.45;
+    /* Hover opacity — brighter but still not harsh white */
+    --icon-hov-opacity: 0.90;
+}
+
+
+/* ── Icon wrapper — the circular hit zone ─────────────────── */
+
+.nav-icon-wrap {
+    position: absolute;
+    width: var(--dot-ring-size);
+    /* reuses existing ring size var */
+    height: var(--dot-ring-size);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    /* Outer ring background — matches old .dot-ring look */
+    background: var(--dot-idle-ring);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    transition: background 0.28s var(--smooth), box-shadow 0.28s var(--smooth), transform var(--t-pop) var(--spring);
+}
+
+
+/* Soft inner glow behind the icon (pseudo-element) */
+
+.nav-icon-wrap::before {
+    content: '';
+    position: absolute;
+    inset: 3px;
+    border-radius: 50%;
+    /* Very faint inner fill — depth without bulk */
+    background: radial-gradient( circle, rgba(255, 255, 255, 0.10) 0%, transparent 70%);
+    pointer-events: none;
+}
+
+
+/* ── The Lucide icon itself ────────────────────────────────
+   CHANGE --icon-size in :root above to resize.
+   CHANGE --icon-idle-opacity for brightness at rest.
+   Icons use currentColor — color is set on .nav-icon directly.
+   ─────────────────────────────────────────────────────────── */
+
+.nav-icon {
+    width: var(--icon-size);
+    height: var(--icon-size);
+    /* Translucent white at rest — glass aesthetic */
+    color: rgba(255, 255, 255, var(--icon-idle-opacity));
+    /* Thin stroke feels more elegant than the default 2px */
+    stroke-width: 1.5;
+    /* Smooth transitions for hover effects below */
+    transition: color 0.28s var(--smooth), filter 0.28s var(--smooth), opacity 0.28s var(--smooth), transform var(--t-pop) var(--spring);
+}
+
+
+/* ============================================================
+   16. ICON HOVER STATE
+   Parent class .navbar-item--hovered is set by React state.
+   Controls: icon brightness, wrapper glow ring, wrapper scale.
+
+   CHANGE the color value on .nav-icon to pick the hover tint.
+   Default: warm white glow (not golden, more premium/minimal).
+   If you want the golden look from the old dots, use #ffd060.
+   ============================================================ */
+
+
+/* Wrapper brightens and gains glow ring */
+
+.navbar-item--hovered .nav-icon-wrap {
+    background: var(--dot-hov-ring);
+    box-shadow: 0 0 16px rgba(255, 200, 40, 0.28), 0 0 36px rgba(255, 150, 0, 0.12);
+    transform: scale(1.30);
+}
+
+
+/* Icon becomes bright and gains a soft bloom filter */
+
+.navbar-item--hovered .nav-icon {
+    /* CHANGE THIS color if you want a different hover tint.
+     rgba(255,255,255,…) = clean white glow
+     #ffd060              = warm golden (matches old dot style) */
+    color: rgba(255, 255, 255, var(--icon-hov-opacity));
+    /* CSS filter bloom — adds the soft glow without extra markup */
+    filter: drop-shadow(0 0 5px rgba(255, 240, 180, 0.70)) drop-shadow(0 0 12px rgba(255, 200, 80, 0.35));
+    transform: scale(1.15);
+}
+
+
+/* ============================================================
+   17. ICON ACCESSIBILITY — focus / active
+   Same logic as section 14 but targeting the new structure.
+   ============================================================ */
+
+.navbar-item:focus-visible .nav-icon-wrap {
+    outline: 2px solid rgba(255, 220, 80, 0.85);
+    outline-offset: 3px;
+    border-radius: 50%;
+}
+
+.navbar-item:active .nav-icon {
+    opacity: 0.60;
+    transform: scale(0.95);
 }

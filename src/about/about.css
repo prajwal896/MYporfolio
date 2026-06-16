@@ -1,0 +1,596 @@
+/* ============================================================
+   About.css
+   Cinematic two-column About section.
+
+   TABLE OF CONTENTS:
+   1.  CSS Variables  ← edit these first before anything else
+   2.  Section wrapper + scroll reveal
+   3.  Vertical accent line
+   4.  Two-column grid
+   5.  Left side — text column
+   6.  Label ("ABOUT ME")
+   7.  Main heading
+   8.  Paragraph
+   9.  "Currently exploring" line
+   10. Tech pill container
+   11. Tech pill
+   12. Pill icon
+   13. Right side — image column
+   14. Glow blob behind image
+   15. Fog layer
+   16. Image wrapper (parallax container)
+   17. Image / placeholder
+   18. Image bottom fade
+   19. Reveal animations
+   20. Responsive — tablet
+   21. Responsive — mobile
+   ============================================================ */
+
+
+/* ============================================================
+   1. CSS VARIABLES
+   Change these to retheme the entire section without hunting
+   through individual rules.
+   ============================================================ */
+
+:root {
+    /* ── Heading ──────────────────────────────────────────── */
+    /* CHANGE THIS to increase/decrease the main heading size  */
+    --about-heading-size: clamp(32px, 4.5vw, 58px);
+    --about-heading-lh: 1.12;
+    /* line height — tighter = more cinematic */
+    /* ── Paragraph ───────────────────────────────────────────*/
+    /* CHANGE THIS to adjust paragraph readability             */
+    --about-para-size: 15px;
+    --about-para-lh: 1.85;
+    /* line height */
+    --about-para-width: 480px;
+    /* max width before wrapping */
+    /* ── Label above heading ─────────────────────────────── */
+    --about-label-size: 10px;
+    --about-label-spacing: 0.28em;
+    /* ── Exploring line ──────────────────────────────────── */
+    --about-exploring-size: 12px;
+    /* ── Pills ───────────────────────────────────────────── */
+    /* CHANGE THIS to control tech pill spacing               */
+    --pill-gap: 8px;
+    --pill-padding-v: 7px;
+    --pill-padding-h: 14px;
+    --pill-font-size: 10.5px;
+    --pill-icon-size: 13px;
+    /* ── Glow behind image ───────────────────────────────── */
+    /* CHANGE THIS color to shift the ambient glow tint       */
+    --glow-color: rgba(160, 30, 18, 0.35);
+    /* CHANGE THIS to increase/decrease the glow radius       */
+    --glow-size: 420px;
+    /* ── Section vertical padding ───────────────────────── */
+    /* CHANGE THIS to adjust top/bottom breathing room        */
+    --section-padding-v: clamp(80px, 10vh, 140px);
+    --section-padding-h: clamp(24px, 7vw, 120px);
+    /* ── Column gap ─────────────────────────────────────── */
+    --col-gap: clamp(40px, 6vw, 100px);
+    /* ── Reveal animation ────────────────────────────────── */
+    --reveal-dur: 0.90s;
+    --reveal-ease: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+
+/* ============================================================
+   2. SECTION WRAPPER + SCROLL REVEAL
+   position: relative gives context for the accent line.
+   Starts invisible (opacity 0, shifted down).
+   JS adds .visible when section enters viewport.
+   ============================================================ */
+
+.about-section {
+    position: relative;
+    display: grid;
+    grid-template-columns: 1fr 0.75fr;
+    align-items: center;
+    gap: var(--col-gap);
+    height: 100vh;
+    padding-left: 16vw;
+    padding-right: 2vw;
+    overflow: hidden;
+}
+
+.about-right {
+    overflow: visible;
+}
+
+body {
+    margin: 0;
+    overflow-x: hidden;
+}
+
+.about-section.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+
+/* ============================================================
+   3. VERTICAL ACCENT LINE
+   Faint vertical stroke on the left edge of the section.
+   Purely decorative — adds visual structure without noise.
+   CHANGE the left value to move it horizontally.
+   CHANGE the background gradient to change its color/fade.
+   ============================================================ */
+
+.about-accent-line {
+    position: absolute;
+    left: 13vw;
+    /* sits left of text */
+    top: 12%;
+    bottom: 12%;
+    width: 1px;
+    background: linear-gradient( to bottom, transparent, rgba(255, 255, 255, 0.10) 30%, rgba(255, 255, 255, 0.10) 70%, transparent);
+    pointer-events: none;
+}
+
+
+/* ============================================================
+   4. TWO-COLUMN GRID
+   Left column is wider (text heavy).
+   Right column holds the image.
+   CHANGE the grid-template-columns ratio to adjust proportions.
+   ============================================================ */
+
+.about-section {
+    display: grid;
+    grid-template-columns: 1fr 0.75fr;
+    /* CHANGE RATIO: left is wider */
+    gap: var(--col-gap);
+    align-items: center;
+}
+
+
+/* ============================================================
+   5. LEFT SIDE — TEXT COLUMN
+   Flex column — everything stacked vertically with gaps.
+   CHANGE --left-gap to control spacing between text elements.
+   ============================================================ */
+
+.about-left {
+    justify-content: center;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 24px;
+    /* CHANGE THIS: space between each text element */
+    position: relative;
+    z-index: 2;
+}
+
+#techstack {
+    margin-left: 30%;
+    font-size: 20px;
+    font-weight: 800;
+    color: white;
+}
+
+
+/* ============================================================
+   6. LABEL — "ABOUT ME"
+   Small uppercase tag above the heading.
+   CHANGE --about-label-size and --about-label-spacing above.
+   ============================================================ */
+
+.about-label {
+    font-family: 'Raleway', sans-serif;
+    font-size: var(--about-label-size);
+    font-weight: 400;
+    letter-spacing: var(--about-label-spacing);
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.35);
+    /* Subtle left tick mark using border */
+    padding-left: 14px;
+    border-left: 1px solid rgba(255, 255, 255, 0.20);
+}
+
+
+/* ============================================================
+   7. MAIN HEADING
+   The visual focal point of the left side.
+   CHANGE --about-heading-size in :root to resize globally.
+   The clamp() makes it responsive automatically.
+   ============================================================ */
+
+.about-heading {
+    margin: 0;
+    font-family: 'Cormorant Garamond', 'Cinzel', serif;
+    font-size: var(--about-heading-size);
+    font-weight: 600;
+    line-height: var(--about-heading-lh);
+    color: rgba(255, 255, 255, 0.92);
+    /* Very subtle text shadow for depth on dark background */
+    text-shadow: 0 2px 40px rgba(0, 0, 0, 0.40);
+}
+
+
+/* ============================================================
+   8. PARAGRAPH
+   Supporting body text.
+   CHANGE --about-para-size for font size.
+   CHANGE --about-para-lh for line height.
+   CHANGE --about-para-width for max width before wrapping.
+   ============================================================ */
+
+.about-para {
+    margin: 0;
+    font-family: 'Raleway', sans-serif;
+    font-size: var(--about-para-size);
+    font-weight: 300;
+    line-height: var(--about-para-lh);
+    color: rgba(255, 255, 255, 0.50);
+    max-width: var(--about-para-width);
+}
+
+
+/* ============================================================
+   9. "CURRENTLY EXPLORING" LINE
+   Subtle secondary note below the paragraph.
+   CHANGE font-size via --about-exploring-size above.
+   ============================================================ */
+
+.about-exploring {
+    margin: 0;
+    font-family: 'Raleway', sans-serif;
+    font-size: var(--about-exploring-size);
+    font-weight: 300;
+    color: rgba(255, 255, 255, 0.38);
+    letter-spacing: 0.04em;
+}
+
+
+/* The "Currently exploring —" prefix */
+
+.about-exploring-label {
+    color: rgba(255, 255, 255, 0.22);
+    font-style: italic;
+}
+
+
+/* ============================================================
+   10. TECH PILL CONTAINER
+   Flex-wrap row — pills reflow naturally on smaller screens.
+   CHANGE --pill-gap to increase/decrease spacing between pills.
+   ============================================================ */
+
+.about-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--pill-gap);
+    max-width: var(--about-para-width);
+}
+
+
+/* ============================================================
+   11. TECH PILL
+   Translucent golden glassmorphism capsule.
+   CHANGE background rgba values to shift the gold tint.
+   CHANGE border color for a different edge tone.
+   ============================================================ */
+
+.about-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: var(--pill-padding-v) var(--pill-padding-h);
+    border-radius: 100px;
+    /* capsule shape */
+    /* Subtle golden translucent fill
+     CHANGE the rgba values here for a different pill tint      */
+    background: rgba(200, 150, 40, 0.08);
+    border: 1px solid rgba(200, 150, 40, 0.22);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    font-family: 'Raleway', sans-serif;
+    font-size: var(--pill-font-size);
+    font-weight: 400;
+    letter-spacing: 0.06em;
+    color: rgba(255, 220, 120, 0.75);
+    white-space: nowrap;
+    cursor: default;
+    user-select: none;
+    /* Hover transition */
+    transition: transform 0.30s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease, color 0.25s ease;
+}
+
+
+/* Pill hover — lifts and glows slightly */
+
+.about-pill:hover {
+    transform: translateY(-3px);
+    background: rgba(200, 150, 40, 0.16);
+    border-color: rgba(200, 150, 40, 0.40);
+    color: rgba(255, 230, 140, 0.95);
+    /* CHANGE this box-shadow to increase/decrease pill hover glow */
+    box-shadow: 0 4px 20px rgba(180, 130, 30, 0.18), 0 0 30px rgba(180, 100, 0, 0.10);
+}
+
+
+/* ============================================================
+   12. PILL ICON
+   Lucide icon inside each pill.
+   CHANGE --pill-icon-size in :root to resize all icons.
+   ============================================================ */
+
+.pill-icon {
+    width: var(--pill-icon-size);
+    height: var(--pill-icon-size);
+    stroke-width: 1.5;
+    flex-shrink: 0;
+    /* inherits color from .about-pill */
+}
+
+.pill-name {
+    /* nothing special — inherits font from .about-pill */
+}
+
+
+/* ============================================================
+   13. RIGHT SIDE — IMAGE COLUMN
+   Position relative so glow/fog children can be absolute.
+   Flex centers everything inside.
+   ============================================================ */
+
+.about-right {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    /* Push image slightly lower for visual balance with heading */
+    /* CHANGE THIS to shift image up/down */
+}
+
+
+/* ============================================================
+   14. GLOW BLOB BEHIND IMAGE
+   Large soft radial gradient creates the ambient glow.
+   Moves slightly differently than the image for depth.
+   CHANGE --glow-color in :root to shift the tint.
+   CHANGE --glow-size  in :root to make it larger/smaller.
+   ============================================================ */
+
+.about-glow {
+    position: absolute;
+    width: var(--glow-size);
+    height: var(--glow-size);
+    border-radius: 50%;
+    background: radial-gradient( circle, var(--glow-color) 0%, rgba(100, 15, 10, 0.12) 45%, transparent 70%);
+    /* CHANGE this blur value to soften/sharpen the glow edge    */
+    filter: blur(40px);
+    pointer-events: none;
+    z-index: 0;
+    /* Transition matches lerp smoothness */
+    transition: transform 0.05s linear;
+    will-change: transform;
+}
+
+html,
+body {
+    margin: 0;
+    overflow-x: hidden;
+    overflow-y: hidden;
+}
+
+
+/* ============================================================
+   15. FOG LAYER
+   Extra atmospheric blur layer between glow and image.
+   Adds separation/depth so image doesn't feel pasted.
+   CHANGE opacity to make fog stronger or weaker.
+   ============================================================ */
+
+.about-fog {
+    position: absolute;
+    inset: -20%;
+    background: radial-gradient( ellipse at 50% 60%, rgba(80, 10, 8, 0.18) 0%, transparent 65%);
+    filter: blur(40px);
+    pointer-events: none;
+    z-index: 1;
+    /* CHANGE this opacity to increase/decrease fog strength     */
+    opacity: 0.7;
+}
+
+
+/* ============================================================
+   16. IMAGE WRAPPER (PARALLAX CONTAINER)
+   The transform for mouse parallax is applied here via JS.
+   will-change: transform triggers GPU compositing for smoothness.
+   CHANGE max-width to make the image larger or smaller.
+   ============================================================ */
+
+.about-image-wrap {
+    position: relative;
+    z-index: 2;
+    will-change: transform;
+    transition: transform 0.05s linear;
+    /* CHANGE THIS to resize the image area */
+    width: 100%;
+    max-width: 360px;
+    /* CHANGE THIS: controls image display size */
+}
+
+
+/* ============================================================
+   17. IMAGE / PLACEHOLDER
+   .about-image    — real <img> tag (add after import)
+   .about-image-placeholder — shown until real image is added
+
+   CHANGE border-radius to make the image shape sharper/rounder.
+   ============================================================ */
+
+
+/* Real image — shown when you replace the placeholder */
+
+.about-image {
+    display: block;
+    width: 100%;
+    height: auto;
+    border-radius: 12px;
+    /* CHANGE THIS: image corner radius */
+    object-fit: cover;
+    object-position: center top;
+    /* Faint border to lift image off background */
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    /* Drop shadow for natural depth */
+    filter: drop-shadow(0 20px 60px rgba(0, 0, 0, 0.60));
+}
+
+
+/* Placeholder shown until real photo is added */
+
+
+/* Initials inside placeholder */
+
+.placeholder-initials {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(42px, 7vw, 72px);
+    font-weight: 300;
+    color: rgba(255, 255, 255, 0.12);
+    letter-spacing: 0.15em;
+    user-select: none;
+}
+
+
+/* ============================================================
+   18. IMAGE BOTTOM FADE
+   Soft gradient at the bottom of the image so it dissolves
+   into the dark background instead of having a hard edge.
+   CHANGE the height to make the fade taller or shorter.
+   ============================================================ */
+
+.about-image-fade {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    /* CHANGE THIS height to control how much fades out at bottom */
+    height: 35%;
+    background: linear-gradient( to top, rgba(0, 0, 0, 0.70) 0%, transparent 100%);
+    border-radius: 0 0 12px 12px;
+    pointer-events: none;
+    z-index: 3;
+}
+
+
+/* ============================================================
+   19. REVEAL ANIMATIONS
+   Staggered reveal for left-side elements when section scrolls
+   into view. Each child gets a slight delay.
+   ============================================================ */
+
+
+/* Children start shifted and invisible */
+
+.about-left>* {
+    opacity: 0;
+    transform: translateY(16px);
+    transition: opacity 0.70s var(--reveal-ease), transform 0.70s var(--reveal-ease);
+}
+
+
+/* Stagger each child's delay
+   CHANGE delay values to speed up/slow down the stagger       */
+
+.about-section.visible .about-left>*:nth-child(1) {
+    opacity: 1;
+    transform: none;
+    transition-delay: 0.10s;
+}
+
+.about-section.visible .about-left>*:nth-child(2) {
+    opacity: 1;
+    transform: none;
+    transition-delay: 0.22s;
+}
+
+.about-section.visible .about-left>*:nth-child(3) {
+    opacity: 1;
+    transform: none;
+    transition-delay: 0.34s;
+}
+
+.about-section.visible .about-left>*:nth-child(4) {
+    opacity: 1;
+    transform: none;
+    transition-delay: 0.44s;
+}
+
+.about-section.visible .about-left>*:nth-child(5) {
+    opacity: 1;
+    transform: none;
+    transition-delay: 0.54s;
+}
+
+
+/* Right side fades in as a whole */
+
+.about-right {
+    opacity: 0;
+    transform: translateX(20px);
+    transition: opacity 0.90s var(--reveal-ease) 0.20s, transform 0.90s var(--reveal-ease) 0.20s;
+}
+
+.about-section.visible .about-right {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+
+/* ============================================================
+   20. RESPONSIVE — TABLET  (max 900px)
+   Reduce column ratio, shrink gaps.
+   ============================================================ */
+
+@media (max-width: 900px) {
+    .about-section {
+        grid-template-columns: 1fr 0.65fr;
+        /* narrow the image column */
+        --col-gap: 32px;
+        --section-padding-h: clamp(20px, 5vw, 60px);
+    }
+    .about-image-wrap {
+        max-width: 280px;
+    }
+}
+
+
+/* ============================================================
+   21. RESPONSIVE — MOBILE  (max 640px)
+   Stack to single column: text on top, image below.
+   ============================================================ */
+
+@media (max-width: 640px) {
+    .about-section {
+        grid-template-columns: 1fr;
+        /* single column */
+        --section-padding-v: 60px;
+        --section-padding-h: 24px;
+    }
+    /* Move right side (image) below left side (text) */
+    .about-right {
+        order: 2;
+        padding-top: 0;
+        margin-top: 40px;
+    }
+    .about-left {
+        order: 1;
+        gap: 20px;
+    }
+    .about-image-wrap {
+        max-width: 260px;
+        margin: 0 auto;
+        /* center the image on mobile */
+    }
+    /* Hide accent line on mobile — too cramped */
+    .about-accent-line {
+        display: none;
+    }
+    /* Pills wrap more aggressively on small screens */
+    .about-pills {
+        max-width: 100%;
+    }
+}

@@ -31,6 +31,8 @@
 // ============================================================
 
 import { useEffect, useRef, useState } from "react";
+import { Link } from "react-router-dom";
+import { Home, User, FolderGit2, BriefcaseBusiness, Mail } from "lucide-react";
 import "./Navbar.css";
 
 // ─────────────────────────────────────────────────────────────
@@ -44,7 +46,7 @@ const CFG = {
   // 0° = right (3 o'clock), angles go clockwise.
   // We want dots in the bottom-right quadrant that peeks on screen.
   arcStart:  1,    // degrees from 3-o'clock going clockwise
-  arcEnd:   89,    // degrees from 3-o'clock going clockwise
+  arcEnd:   90,    // degrees from 3-o'clock going clockwise
 
   // How far inside the circle edge the dots sit (px from edge)
   dotInset: 28,
@@ -53,13 +55,24 @@ const CFG = {
   dotPopDistance: 14,
 };
 
-// Navigation items — edit to add/remove/rename
+// ─────────────────────────────────────────────────────────────
+// NAV_ITEMS — edit this array to change routes, labels, icons
+//
+// id     : unique key, used for hover state tracking
+// label  : text shown on hover (controlled by Navbar.css .dot-label)
+// route  : React Router path — CHANGE THESE to match your routes
+// icon   : Lucide React component — CHANGE THESE to swap icons
+//          Full icon list: https://lucide.dev/icons
+//
+// To add a new item: copy any row, change all four fields,
+// then add it to the array. Arc spacing adjusts automatically.
+// ─────────────────────────────────────────────────────────────
 const NAV_ITEMS = [
-  { id: "home",     label: "Home"     },
-  { id: "about",    label: "About"    },
-  { id: "projects", label: "Projects" },
-  { id: "services", label: "Services" },
-  { id: "contact",  label: "Contact"  },
+  { id: "home",     label: "Home",     to: "/",         icon: Home             },
+  { id: "about",    label: "About",    to: "/about",    icon: User             },
+  { id: "projects", label: "Projects", to: "/projects", icon: FolderGit2       },
+  { id: "services", label: "Services", to: "/services", icon: BriefcaseBusiness },
+  { id: "contact",  label: "Contact",  to: "/contact",  icon: Mail             },
 ];
 
 // ─────────────────────────────────────────────────────────────
@@ -258,8 +271,17 @@ export default function Navbar() {
         {/* ── Nav dots — placed on the arc via polar math ───── */}
         {NAV_ITEMS.map((item, i) => {
           // t: 0 = first item, 1 = last item
-          const edgePadding = 0.07;
-          const t = NAV_ITEMS.length > 1? edgePadding + (i / (NAV_ITEMS.length - 1)) * (1 - edgePadding * 2): 0.5;
+          // ── SPACING CONTROL ──────────────────────────────────────
+// dotSpread: how much of the arc the dots actually occupy (0.0 – 1.0)
+// 1.0 = dots spread across full arc (current behavior)
+// 0.5 = dots clustered in the middle 50% of the arc
+// 0.3 = dots packed tightly in the center of the arc
+const dotSpread = 0.8;           // ← CHANGE THIS to control dot spacing
+const dotOffset = (1 - dotSpread) / 2;  // centers the cluster on the arc
+
+const t = NAV_ITEMS.length > 1
+  ? dotOffset + (i / (NAV_ITEMS.length - 1)) * dotSpread
+  : 0.5;
           const pos = dotPosition(t);
           const isHovered = hoveredId === item.id;
 
@@ -275,40 +297,48 @@ export default function Navbar() {
           const ly = Math.sin(rad) * labelOffsetR;
 
           return (
-            <a
+            // ── Each nav item ─────────────────────────────────────
+            // ROUTING: swap <Link to={item.route}> back to <a href>
+            // if you remove React Router from the project.
+            <Link
               key={item.id}
-              href={`#${item.id}`}
+              to={item.to}
               className={`navbar-item${isHovered ? " navbar-item--hovered" : ""}`}
               aria-label={item.label}
-              onMouseEnter={() => setHoveredId(item.id)}
+              onMouseEnter={() => setHoveredId  (item.id)}
               onMouseLeave={() => setHoveredId(null)}
               style={{
-                // Place dot center at computed arc position.
-                // pos.x / pos.y are from center=(0,0); add R to get SVG/div coords.
+                // Arc position — DO NOT TOUCH these two lines.
+                // pos.x / pos.y are from center=(0,0); add R to convert to div coords.
                 left: `${R + pos.x}px`,
                 top:  `${R + pos.y}px`,
-                // Pop outward on hover
+                // Outward pop on hover — controlled by CFG.dotPopDistance
                 transform: `translate(-50%, -50%) translate(${popX}px, ${popY}px)`,
               }}
             >
-              {/* Outer glow ring */}
-              <span className="dot-ring" aria-hidden="true" />
+              {/* ── Icon ─────────────────────────────────────────
+                  ICON STYLE: controlled by .nav-icon in Navbar.css
+                  ICON SWAP:  change item.icon in NAV_ITEMS above
+                  SIZE:       set by --icon-size CSS variable
+                  The outer ring + inner glow are now CSS ::before/::after
+                  on the .nav-icon-wrap div rather than separate spans.  */}
+              <span className="nav-icon-wrap" aria-hidden="true">
+                {/* Render the Lucide icon component stored in item.icon */}
+                <item.icon className="nav-icon" />
+              </span>
 
-              {/* Bright core dot */}
-              <span className="dot-core" aria-hidden="true" />
-
-              {/* Label — slides outward from the dot on hover */}
+              {/* Label — slides outward on hover, hidden at rest.
+                  Position controlled by --lx / --ly CSS custom props. */}
               <span
                 className="dot-label"
                 style={{
-                  // Offset along outward radial + 12px perpendicular nudge
                   '--lx': `${lx + 18}px`,
                   '--ly': `${ly - 6}px`,
                 }}
               >
                 {item.label}
               </span>
-            </a>
+            </Link>
           );
         })}
 

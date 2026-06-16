@@ -44,7 +44,7 @@
 
 import { useEffect, useRef } from "react";
 import "./HeroText.css";
-import Enter from "./Enter";
+import Enter from "./enter";
 
 // ─────────────────────────────────────────────────────────────
 // ██████████████████████████████████████████████████████████

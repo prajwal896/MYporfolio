@@ -9,17 +9,26 @@ import FogLayer from './Front/FogLayer'
 import { Routes, Route } from "react-router-dom";
 
 import Home from "./Front/home";
-import About from "./about/about";
+import About from "./about/About";
+import Projects from "./Projects/Projects";
+import Services from './services/services';
+import Contact from './contact/contact'
 
 function App() {
   const [count, setCount] = useState(0)
 
   return (
     <>
-    
+    <Background />
+    <FogLayer />
+    <Navbar />
     <Routes>
       <Route path="/" element={<Home />} />
       <Route path="/about" element={<About />} />
+      <Route path="/projects" element={<Projects />} />
+      <Route path="/services" element={<Services />} />
+      <Route path="/contact" element={<Contact/>} />
+
     </Routes>
     </>
   )

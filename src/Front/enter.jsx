@@ -1,13 +1,4 @@
-// ============================================================
-// Enter.jsx
-// "Enter Portfolio" CTA button for the hero landing screen.
-//
-// DESIGN:
-//   Capsule-shaped anchor with a thin white border, translucent
-//   fill, and a very soft glow ring (::before pseudo-element).
-//   Hover lifts the button 3px upward. Active press scales down.
-//   All motion is smooth — no spring bounce, no aggressive easing.
-//
+
 // REVEAL:
 //   The button is hidden by default (opacity: 0 in CSS).
 //   It becomes visible when the parent (HeroText.jsx) adds the
