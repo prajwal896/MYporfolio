@@ -16,7 +16,7 @@
 //   React Router is added. The className/ref props stay the same.
 // ============================================================
 
-import "./Enter.css";
+import "./enter.css";
 import { Link } from "react-router-dom";
 // ─────────────────────────────────────────────────────────────
 // Enter component
