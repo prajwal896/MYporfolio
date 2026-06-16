@@ -9,7 +9,7 @@ import FogLayer from './Front/FogLayer'
 import { Routes, Route } from "react-router-dom";
 
 import Home from "./Front/home";
-import About from "./about/About";
+import About from "./about/about";
 import Projects from "./Projects/Projects";
 import Services from './services/services';
 import Contact from './contact/contact'
